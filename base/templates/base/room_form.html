@@ -158,7 +158,35 @@
     <div class="form-card__body">
       <form method="POST" class="django-form">
         {% csrf_token %}
-        {{ form.as_p }}
+        <div class="field">
+          <label for="room_topic">Topic</label>
+
+          <input
+            required
+            type="text"
+            value="{{ room.topic.name }}"
+            name="topic"
+            list="topic-list"
+            placeholder="Enter or select a topic"
+          >
+
+          <datalist id="topic-list">
+            {% for topic in topics %}
+            <option value="{{ topic.name }}">
+            {% endfor %}
+          </datalist>
+        </div>
+
+        <div class="field">
+          <label for="room_name">Room Name</label>
+          {{ form.name }}
+        </div>
+
+        <div class="field">
+          <label for="room_description">Description</label>
+          {{ form.description }}
+        </div>
+        
         <div class="form-actions">
           <a href="{% url 'home' %}" class="btn btn-ghost">Cancel</a>
           <button type="submit" class="form-submit">
