@@ -1,0 +1,273 @@
+{% extends 'base/main.html' %}
+{% block content %}
+
+<style>
+  .home-layout {
+    display: grid;
+    grid-template-columns: 220px 1fr 280px;
+    gap: 1.5rem;
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 2rem;
+    align-items: start;
+  }
+
+  /* ── Topics Sidebar ── */
+  .topics-sidebar { position: sticky; top: 80px; }
+  .sidebar-title {
+    font-family: var(--font-head);
+    font-size: 1rem;
+    color: var(--muted);
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+  }
+  .topics-list { display: flex; flex-direction: column; gap: .35rem; }
+  .topic-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: .5rem .75rem;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    color: var(--muted);
+    font-size: .875rem;
+    transition: all .2s;
+    cursor: pointer;
+  }
+  .topic-item:hover, .topic-item.active {
+    background: var(--surface);
+    border-color: var(--border);
+    color: var(--accent);
+  }
+  .topic-item .count {
+    font-size: .75rem;
+    background: var(--surface2);
+    padding: .1rem .45rem;
+    border-radius: 20px;
+    color: var(--muted);
+  }
+
+  /* ── Rooms Feed ── */
+  .feed-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.25rem;
+  }
+  .feed-header h2 {
+    font-family: var(--font-head);
+    font-size: 1.4rem;
+    font-weight: 400;
+    color: var(--text);
+  }
+  .room-count {
+    font-size: .8rem;
+    color: var(--muted);
+    background: var(--surface);
+    padding: .25rem .7rem;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+  }
+
+  .rooms-list { display: flex; flex-direction: column; gap: 1rem; }
+
+  .room-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.25rem 1.5rem;
+    transition: border-color .2s, transform .2s;
+    position: relative;
+  }
+  .room-card:hover { border-color: var(--accent); transform: translateY(-1px); }
+
+  .room-card__meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: .75rem;
+  }
+  .room-card__topic { }
+  .room-card__time { font-size: .75rem; color: var(--muted); }
+
+  .room-card__title {
+    font-family: var(--font-head);
+    font-size: 1.15rem;
+    font-weight: 400;
+    margin-bottom: .5rem;
+  }
+  .room-card__title a:hover { color: var(--accent); }
+
+  .room-card__desc {
+    font-size: .85rem;
+    color: var(--muted);
+    margin-bottom: 1rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .room-card__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .room-card__host {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    font-size: .8rem;
+    color: var(--muted);
+  }
+  .room-card__host .avatar { width: 26px; height: 26px; font-size: .7rem; }
+  .room-card__host a:hover { color: var(--accent); }
+
+  .room-card__actions { display: flex; gap: .5rem; }
+  .icon-btn {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--muted);
+    padding: .3rem .55rem;
+    font-size: .8rem;
+    cursor: pointer;
+    transition: all .2s;
+    text-decoration: none;
+  }
+  .icon-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .icon-btn.del:hover { border-color: var(--danger); color: var(--danger); }
+
+  .no-rooms {
+    text-align: center;
+    padding: 3rem;
+    color: var(--muted);
+    font-style: italic;
+    font-family: var(--font-head);
+    font-size: 1.1rem;
+  }
+
+  /* ── Activity Sidebar ── */
+  .activity-sidebar { position: sticky; top: 80px; }
+  .activity-feed { display: flex; flex-direction: column; gap: .75rem; }
+
+  .activity-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: .85rem 1rem;
+    font-size: .82rem;
+    transition: border-color .2s;
+  }
+  .activity-item:hover { border-color: var(--border); }
+
+  .activity-item__header {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    margin-bottom: .4rem;
+  }
+  .activity-item__header .avatar { width: 24px; height: 24px; font-size: .65rem; }
+  .activity-item__user { color: var(--accent); font-weight: 500; }
+  .activity-item__room { color: var(--muted); }
+  .activity-item__room a:hover { color: var(--text); }
+  .activity-item__body {
+    color: var(--text);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    line-height: 1.5;
+  }
+
+  @media (max-width: 900px) {
+    .home-layout { grid-template-columns: 1fr; }
+    .topics-sidebar, .activity-sidebar { position: static; }
+  }
+</style>
+
+<div class="home-layout">
+
+  <!-- Left: Topics -->
+  <aside class="topics-sidebar">
+    <p class="sidebar-title">Topics</p>
+    <div class="topics-list">
+      <a href="{% url 'home' %}" class="topic-item {% if not request.GET.q %}active{% endif %}">
+        <span>All Rooms</span>
+        <span class="count">{{ room_count }}</span>
+      </a>
+      {% for topic in topics %}
+      <a href="{% url 'home' %}?q={{ topic.name }}" class="topic-item {% if request.GET.q == topic.name %}active{% endif %}">
+        <span>{{ topic.name }}</span>
+      </a>
+      {% endfor %}
+    </div>
+  </aside>
+
+  <!-- Center: Rooms -->
+  <main>
+    <div class="feed-header">
+      <h2>Study Rooms</h2>
+      <span class="room-count">{{ room_count }} room{{ room_count|pluralize }}</span>
+    </div>
+
+    <div class="rooms-list">
+      {% for room in rooms %}
+      <div class="room-card">
+        <div class="room-card__meta">
+          <a href="{% url 'home' %}?q={{ room.topic.name }}" class="tag">{{ room.topic }}</a>
+          <span class="room-card__time">{{ room.updated|timesince }} ago</span>
+        </div>
+
+        <h3 class="room-card__title">
+          <a href="{% url 'room' room.id %}">{{ room.name }}</a>
+        </h3>
+
+        {% if room.description %}
+        <p class="room-card__desc">{{ room.description }}</p>
+        {% endif %}
+
+        <div class="room-card__footer">
+          <div class="room-card__host">
+            <div class="avatar">{{ room.host.username|first|upper }}</div>
+            <a href="{% url 'user-profile' room.host.id %}">@{{ room.host.username }}</a>
+          </div>
+
+          {% if request.user == room.host %}
+          <div class="room-card__actions">
+            <a href="{% url 'update-room' room.id %}" class="icon-btn" title="Edit">✏️</a>
+            <a href="{% url 'delete-room' room.id %}" class="icon-btn del" title="Delete">🗑️</a>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+      {% empty %}
+      <div class="no-rooms">No rooms found. Be the first to create one!</div>
+      {% endfor %}
+    </div>
+  </main>
+
+  <!-- Right: Activity -->
+  <aside class="activity-sidebar">
+    <p class="sidebar-title">Recent Activity</p>
+    <div class="activity-feed">
+      {% for message in room_messages %}
+      <div class="activity-item">
+        <div class="activity-item__header">
+          <div class="avatar">{{ message.user.username|first|upper }}</div>
+          <a href="{% url 'user-profile' message.user.id %}" class="activity-item__user">@{{ message.user.username }}</a>
+        </div>
+        <div class="activity-item__room">
+          in <a href="{% url 'room' message.room.id %}">{{ message.room.name }}</a>
+        </div>
+        <p class="activity-item__body">{{ message.body }}</p>
+      </div>
+      {% empty %}
+      <p style="color:var(--muted);font-size:.85rem;">No recent activity.</p>
+      {% endfor %}
+    </div>
+  </aside>
+
+</div>
+{% endblock %}

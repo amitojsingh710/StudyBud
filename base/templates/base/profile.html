@@ -1,0 +1,251 @@
+{% extends 'base/main.html' %}
+{% block content %}
+
+<style>
+  .profile-layout {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 1.5rem;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 2rem;
+    align-items: start;
+  }
+
+  /* ── Profile Card ── */
+  .profile-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 2rem;
+    text-align: center;
+    position: sticky;
+    top: 80px;
+  }
+
+  .profile-avatar {
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    background: var(--surface2);
+    border: 3px solid var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-head);
+    font-size: 2rem;
+    color: var(--accent);
+    margin: 0 auto 1rem;
+  }
+
+  .profile-name {
+    font-family: var(--font-head);
+    font-size: 1.5rem;
+    font-weight: 400;
+    margin-bottom: .25rem;
+  }
+
+  .profile-username {
+    color: var(--muted);
+    font-size: .9rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .profile-stats {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    padding: 1rem 0;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 1.25rem;
+  }
+
+  .stat { text-align: center; }
+  .stat-num {
+    font-family: var(--font-head);
+    font-size: 1.5rem;
+    color: var(--accent);
+    line-height: 1;
+  }
+  .stat-label {
+    font-size: .75rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    margin-top: .2rem;
+  }
+
+  /* ── Topics ── */
+  .profile-topics {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .4rem;
+    justify-content: center;
+  }
+
+  /* ── Tabs ── */
+  .tabs {
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 1.5rem;
+  }
+  .tab {
+    padding: .65rem 1.25rem;
+    font-size: .875rem;
+    font-weight: 500;
+    color: var(--muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: all .2s;
+  }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  /* ── Rooms Grid ── */
+  .profile-rooms { display: flex; flex-direction: column; gap: .85rem; }
+
+  .profile-room-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1rem 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    transition: border-color .2s;
+  }
+  .profile-room-item:hover { border-color: var(--accent); }
+  .profile-room-item__info { flex: 1; }
+  .profile-room-item__name {
+    font-weight: 500;
+    margin-bottom: .25rem;
+  }
+  .profile-room-item__name a:hover { color: var(--accent); }
+  .profile-room-item__meta { font-size: .8rem; color: var(--muted); display: flex; gap: .75rem; }
+
+  /* ── Messages ── */
+  .profile-messages { display: flex; flex-direction: column; gap: .85rem; }
+
+  .profile-msg-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1rem 1.25rem;
+    font-size: .875rem;
+  }
+  .profile-msg-item__room {
+    font-size: .8rem;
+    color: var(--muted);
+    margin-bottom: .4rem;
+  }
+  .profile-msg-item__room a:hover { color: var(--accent); }
+  .profile-msg-item__body { color: var(--text); line-height: 1.5; }
+
+  .empty-state {
+    text-align: center;
+    padding: 3rem;
+    color: var(--muted);
+    font-style: italic;
+    font-family: var(--font-head);
+    font-size: 1.05rem;
+  }
+
+  @media (max-width: 768px) {
+    .profile-layout { grid-template-columns: 1fr; }
+    .profile-card { position: static; }
+  }
+</style>
+
+<div class="profile-layout">
+
+  <!-- Profile Card -->
+  <aside>
+    <div class="profile-card">
+      <div class="profile-avatar">{{ user.username|first|upper }}</div>
+      <h1 class="profile-name">{{ user.username }}</h1>
+      <p class="profile-username">@{{ user.username }}</p>
+
+      <div class="profile-stats">
+        <div class="stat">
+          <div class="stat-num">{{ rooms.count }}</div>
+          <div class="stat-label">Rooms</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num">{{ room_messages.count }}</div>
+          <div class="stat-label">Messages</div>
+        </div>
+      </div>
+
+      <div class="profile-topics">
+        {% for topic in topics %}
+          <span class="tag">{{ topic.name }}</span>
+        {% endfor %}
+      </div>
+    </div>
+  </aside>
+
+  <!-- Content -->
+  <main>
+    <div class="tabs">
+      <div class="tab active" onclick="showTab('rooms', this)">Rooms ({{ rooms.count }})</div>
+      <div class="tab" onclick="showTab('messages', this)">Messages ({{ room_messages.count }})</div>
+    </div>
+
+    <!-- Rooms Tab -->
+    <div id="tab-rooms" class="tab-content">
+      <div class="profile-rooms">
+        {% for room in rooms %}
+        <div class="profile-room-item">
+          <div class="profile-room-item__info">
+            <div class="profile-room-item__name">
+              <a href="{% url 'room' room.id %}">{{ room.name }}</a>
+            </div>
+            <div class="profile-room-item__meta">
+              <a href="{% url 'home' %}?q={{ room.topic.name }}" class="tag" style="font-size:.72rem;padding:.15rem .55rem;">{{ room.topic }}</a>
+              <span>{{ room.updated|timesince }} ago</span>
+            </div>
+          </div>
+          {% if request.user == room.host %}
+          <div style="display:flex;gap:.4rem;">
+            <a href="{% url 'update-room' room.id %}" class="icon-btn">✏️</a>
+            <a href="{% url 'delete-room' room.id %}" class="icon-btn del">🗑️</a>
+          </div>
+          {% endif %}
+        </div>
+        {% empty %}
+        <div class="empty-state">No rooms created yet.</div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Messages Tab -->
+    <div id="tab-messages" class="tab-content" style="display:none;">
+      <div class="profile-messages">
+        {% for message in room_messages %}
+        <div class="profile-msg-item">
+          <div class="profile-msg-item__room">
+            in <a href="{% url 'room' message.room.id %}">{{ message.room.name }}</a>
+            &middot; {{ message.created|timesince }} ago
+          </div>
+          <p class="profile-msg-item__body">{{ message.body }}</p>
+        </div>
+        {% empty %}
+        <div class="empty-state">No messages yet.</div>
+        {% endfor %}
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+  function showTab(name, el) {
+    document.querySelectorAll('.tab-content').forEach(t => t.style.display = 'none');
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('tab-' + name).style.display = 'block';
+    el.classList.add('active');
+  }
+</script>
+
+{% endblock %}

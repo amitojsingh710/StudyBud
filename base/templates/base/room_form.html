@@ -1,0 +1,173 @@
+{% extends 'base/main.html' %}
+{% block content %}
+
+<style>
+  .form-page {
+    min-height: calc(100vh - 62px);
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 3rem 1rem;
+  }
+
+  .form-card {
+    width: 100%;
+    max-width: 560px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    animation: cardIn .4s ease;
+  }
+  @keyframes cardIn {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .form-card__header {
+    padding: 1.75rem 2rem 1.25rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .form-card__back {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    color: var(--muted);
+    font-size: .8rem;
+    margin-bottom: 1rem;
+    transition: color .2s;
+  }
+  .form-card__back:hover { color: var(--accent); }
+
+  .form-card__title {
+    font-family: var(--font-head);
+    font-size: 1.6rem;
+    font-weight: 400;
+  }
+  .form-card__sub {
+    color: var(--muted);
+    font-size: .875rem;
+    margin-top: .25rem;
+  }
+
+  .form-card__body { padding: 1.75rem 2rem; }
+
+  .field { margin-bottom: 1.25rem; }
+  .field label {
+    display: block;
+    font-size: .78rem;
+    font-weight: 500;
+    color: var(--muted);
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    margin-bottom: .45rem;
+  }
+
+  .field input[type="text"],
+  .field select,
+  .field textarea {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: .9rem;
+    padding: .75rem 1rem;
+    outline: none;
+    transition: border-color .2s;
+  }
+  .field input:focus,
+  .field select:focus,
+  .field textarea:focus { border-color: var(--accent); }
+  .field input::placeholder,
+  .field textarea::placeholder { color: var(--muted); }
+
+  .field select option { background: var(--surface2); color: var(--text); }
+
+  .field textarea { resize: vertical; min-height: 100px; line-height: 1.6; }
+
+  /* Django auto-rendered form fields */
+  .django-form p { margin-bottom: 1.25rem; }
+  .django-form p label {
+    display: block;
+    font-size: .78rem;
+    font-weight: 500;
+    color: var(--muted);
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    margin-bottom: .45rem;
+  }
+  .django-form p input,
+  .django-form p select,
+  .django-form p textarea {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: .9rem;
+    padding: .75rem 1rem;
+    outline: none;
+    transition: border-color .2s;
+  }
+  .django-form p input:focus,
+  .django-form p select:focus,
+  .django-form p textarea:focus { border-color: var(--accent); }
+  .django-form p textarea { resize: vertical; min-height: 100px; }
+  .django-form ul.errorlist { list-style: none; margin-top: .3rem; }
+  .django-form ul.errorlist li { font-size: .8rem; color: var(--danger); }
+
+  .form-actions {
+    display: flex;
+    gap: .75rem;
+    justify-content: flex-end;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+    margin-top: .5rem;
+  }
+
+  .form-submit {
+    background: var(--accent);
+    color: #0f0e0c;
+    border: none;
+    border-radius: 8px;
+    padding: .75rem 2rem;
+    font-family: var(--font-head);
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background .2s;
+  }
+  .form-submit:hover { background: var(--accent2); }
+</style>
+
+<div class="form-page">
+  <div class="form-card">
+    <div class="form-card__header">
+      <a href="{% url 'home' %}" class="form-card__back">← Back to rooms</a>
+      <h1 class="form-card__title">
+        {% if form.instance.pk %}Edit Room{% else %}Create a Room{% endif %}
+      </h1>
+      <p class="form-card__sub">
+        {% if form.instance.pk %}Update your study room details{% else %}Start a new study session{% endif %}
+      </p>
+    </div>
+
+    <div class="form-card__body">
+      <form method="POST" class="django-form">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <div class="form-actions">
+          <a href="{% url 'home' %}" class="btn btn-ghost">Cancel</a>
+          <button type="submit" class="form-submit">
+            {% if form.instance.pk %}Save Changes{% else %}Create Room{% endif %}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

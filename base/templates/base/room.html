@@ -1,0 +1,319 @@
+{% extends 'base/main.html' %}
+{% block content %}
+
+<style>
+  .room-layout {
+    display: grid;
+    grid-template-columns: 1fr 280px;
+    gap: 1.5rem;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 2rem;
+    align-items: start;
+  }
+
+  /* ── Room Header ── */
+  .room-header {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    margin-bottom: 1.25rem;
+  }
+  .room-header__top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+  .room-header__topic { margin-bottom: .6rem; }
+  .room-header__name {
+    font-family: var(--font-head);
+    font-size: 1.8rem;
+    font-weight: 400;
+    line-height: 1.2;
+  }
+  .room-header__desc {
+    color: var(--muted);
+    font-size: .9rem;
+    margin-top: .4rem;
+    line-height: 1.6;
+  }
+  .room-header__actions { display: flex; gap: .5rem; flex-shrink: 0; }
+  .room-header__meta {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+  }
+  .room-header__host {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    font-size: .85rem;
+    color: var(--muted);
+  }
+  .room-header__host a { color: var(--accent); }
+  .room-header__host a:hover { color: var(--accent2); }
+
+  /* ── Messages ── */
+  .messages-section { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+
+  .messages-list {
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    max-height: 480px;
+    overflow-y: auto;
+  }
+
+  .message-item {
+    display: flex;
+    gap: .75rem;
+    animation: fadeUp .3s ease;
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .message-item .avatar { flex-shrink: 0; width: 36px; height: 36px; font-size: .85rem; }
+  .message-item__content { flex: 1; }
+  .message-item__header {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    margin-bottom: .3rem;
+  }
+  .message-item__author {
+    font-weight: 500;
+    font-size: .85rem;
+    color: var(--accent);
+  }
+  .message-item__author:hover { color: var(--accent2); }
+  .message-item__time { font-size: .75rem; color: var(--muted); }
+  .message-item__body {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 0 10px 10px 10px;
+    padding: .65rem .9rem;
+    font-size: .9rem;
+    line-height: 1.55;
+    color: var(--text);
+  }
+  .message-item__del {
+    margin-left: auto;
+    font-size: .75rem;
+    color: var(--muted);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    text-decoration: none;
+  }
+  .message-item__del:hover { color: var(--danger); }
+
+  /* ── Message Form ── */
+  .message-form {
+    border-top: 1px solid var(--border);
+    padding: 1rem 1.25rem;
+    display: flex;
+    gap: .75rem;
+    align-items: flex-end;
+  }
+  .message-form textarea {
+    flex: 1;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: .9rem;
+    padding: .75rem 1rem;
+    resize: none;
+    outline: none;
+    min-height: 60px;
+    max-height: 150px;
+    transition: border-color .2s;
+  }
+  .message-form textarea:focus { border-color: var(--accent); }
+  .message-form textarea::placeholder { color: var(--muted); }
+  .message-form button {
+    background: var(--accent);
+    color: #0f0e0c;
+    border: none;
+    border-radius: 10px;
+    padding: .75rem 1.2rem;
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: .9rem;
+    cursor: pointer;
+    transition: background .2s;
+    white-space: nowrap;
+  }
+  .message-form button:hover { background: var(--accent2); }
+
+  /* ── Participants ── */
+  .participants-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    position: sticky;
+    top: 80px;
+  }
+  .participants-title {
+    font-family: var(--font-head);
+    font-size: 1rem;
+    color: var(--muted);
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+  }
+  .participants-count {
+    font-size: .8rem;
+    color: var(--muted);
+    margin-bottom: 1rem;
+  }
+  .participants-list { display: flex; flex-direction: column; gap: .6rem; }
+  .participant-item {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    font-size: .85rem;
+    padding: .4rem .5rem;
+    border-radius: 8px;
+    transition: background .2s;
+  }
+  .participant-item:hover { background: var(--surface2); }
+  .participant-item .avatar { width: 30px; height: 30px; font-size: .75rem; }
+  .participant-item a { color: var(--text); }
+  .participant-item a:hover { color: var(--accent); }
+
+  .login-prompt {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    text-align: center;
+    font-size: .9rem;
+    color: var(--muted);
+    margin-top: 1rem;
+  }
+  .login-prompt a { color: var(--accent); }
+
+  @media (max-width: 768px) {
+    .room-layout { grid-template-columns: 1fr; }
+    .participants-card { position: static; }
+  }
+</style>
+
+<div class="room-layout">
+
+  <!-- Main: Chat -->
+  <div>
+    <!-- Room Header -->
+    <div class="room-header">
+      <div class="room-header__top">
+        <div>
+          <div class="room-header__topic">
+            <a href="{% url 'home' %}?q={{ room.topic.name }}" class="tag">{{ room.topic }}</a>
+          </div>
+          <h1 class="room-header__name">{{ room.name }}</h1>
+          {% if room.description %}
+          <p class="room-header__desc">{{ room.description }}</p>
+          {% endif %}
+        </div>
+        {% if request.user == room.host %}
+        <div class="room-header__actions">
+          <a href="{% url 'update-room' room.id %}" class="btn btn-ghost" style="font-size:.8rem;padding:.4rem .9rem;">✏️ Edit</a>
+          <a href="{% url 'delete-room' room.id %}" class="btn btn-danger" style="font-size:.8rem;padding:.4rem .9rem;">🗑️ Delete</a>
+        </div>
+        {% endif %}
+      </div>
+      <div class="room-header__meta">
+        <div class="room-header__host">
+          <div class="avatar">{{ room.host.username|first|upper }}</div>
+          Hosted by <a href="{% url 'user-profile' room.host.id %}">@{{ room.host.username }}</a>
+        </div>
+        <span style="color:var(--muted);font-size:.8rem;">Updated {{ room.updated|timesince }} ago</span>
+      </div>
+    </div>
+
+    <!-- Messages -->
+    <div class="messages-section">
+      <div class="messages-list" id="messages-list">
+        {% for message in room_messages %}
+        <div class="message-item">
+          <div class="avatar">{{ message.user.username|first|upper }}</div>
+          <div class="message-item__content">
+            <div class="message-item__header">
+              <a href="{% url 'user-profile' message.user.id %}" class="message-item__author">@{{ message.user.username }}</a>
+              <span class="message-item__time">{{ message.created|timesince }} ago</span>
+              {% if request.user == message.user %}
+              <a href="{% url 'delete-message' message.id %}" class="message-item__del">✕</a>
+              {% endif %}
+            </div>
+            <div class="message-item__body">{{ message.body }}</div>
+          </div>
+        </div>
+        {% empty %}
+        <p style="text-align:center;color:var(--muted);font-style:italic;padding:2rem;font-family:var(--font-head);">
+          Be the first to say something!
+        </p>
+        {% endfor %}
+      </div>
+
+      {% if request.user.is_authenticated %}
+      <form class="message-form" method="POST">
+        {% csrf_token %}
+        <textarea name="body" placeholder="Write a message…" rows="2"></textarea>
+        <button type="submit">Send</button>
+      </form>
+      {% else %}
+      <div class="login-prompt">
+        <a href="{% url 'login' %}">Log in</a> to join the conversation
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Sidebar: Participants -->
+  <aside>
+    <div class="participants-card">
+      <p class="participants-title">Participants</p>
+      <p class="participants-count">{{ participants.count }} member{{ participants.count|pluralize }}</p>
+      <div class="participants-list">
+        {% for participant in participants %}
+        <div class="participant-item">
+          <div class="avatar">{{ participant.username|first|upper }}</div>
+          <a href="{% url 'user-profile' participant.id %}">@{{ participant.username }}</a>
+        </div>
+        {% empty %}
+        <p style="color:var(--muted);font-size:.85rem;">No participants yet.</p>
+        {% endfor %}
+      </div>
+    </div>
+  </aside>
+
+</div>
+
+<script>
+  // Auto-scroll messages to bottom
+  const list = document.getElementById('messages-list');
+  if (list) list.scrollTop = list.scrollHeight;
+
+  // Auto-grow textarea
+  const ta = document.querySelector('.message-form textarea');
+  if (ta) {
+    ta.addEventListener('input', () => {
+      ta.style.height = 'auto';
+      ta.style.height = ta.scrollHeight + 'px';
+    });
+  }
+</script>
+
+{% endblock %}
