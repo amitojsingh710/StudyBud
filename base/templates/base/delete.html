@@ -1,105 +1,79 @@
 {% extends 'base/main.html' %}
 {% block content %}
-
 <style>
-  .delete-page {
-    min-height: calc(100vh - 62px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 2rem 1rem;
+  .del-pg {
+    min-height:calc(100vh - 64px);
+    display:flex; align-items:center; justify-content:center;
+    padding:2rem 1rem;
   }
 
-  .delete-card {
-    width: 100%;
-    max-width: 440px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 2.5rem;
-    text-align: center;
-    animation: cardIn .4s ease;
+  .del-card {
+    width:100%; max-width:420px;
+    background:var(--glass);
+    border:1px solid rgba(255,112,112,.2);
+    border-radius:var(--r-xl);
+    backdrop-filter:blur(24px);
+    padding:2.5rem;
+    text-align:center;
+    box-shadow:0 24px 80px rgba(0,0,0,.45), 0 0 0 1px rgba(255,112,112,.06);
+    animation:delIn .45s cubic-bezier(.34,1.56,.64,1);
+    position:relative; overflow:hidden;
   }
-  @keyframes cardIn {
-    from { opacity: 0; transform: scale(.97); }
-    to   { opacity: 1; transform: scale(1); }
+  @keyframes delIn { from{opacity:0;transform:scale(.94)} to{opacity:1;transform:none} }
+
+  .del-card::before {
+    content:''; position:absolute; inset:0; border-radius:var(--r-xl);
+    background:radial-gradient(circle at 50% 0%, rgba(255,112,112,.05) 0%, transparent 60%);
+    pointer-events:none;
   }
 
-  .delete-icon {
-    font-size: 3rem;
-    margin-bottom: 1rem;
-    display: block;
-    animation: shake .5s ease .3s both;
+  .del-icon {
+    font-size:3rem; display:block; margin-bottom:1rem;
+    animation:shake .55s ease .3s both;
   }
   @keyframes shake {
-    0%, 100% { transform: rotate(0); }
-    25% { transform: rotate(-8deg); }
-    75% { transform: rotate(8deg); }
+    0%,100%{transform:rotate(0)} 20%{transform:rotate(-10deg)} 40%{transform:rotate(10deg)}
+    60%{transform:rotate(-7deg)} 80%{transform:rotate(7deg)}
   }
 
-  .delete-title {
-    font-family: var(--font-head);
-    font-size: 1.5rem;
-    font-weight: 400;
-    margin-bottom: .5rem;
+  .del-title {
+    font-family:var(--font-h); font-size:1.5rem; font-weight:500; margin-bottom:.5rem;
   }
 
-  .delete-sub {
-    color: var(--muted);
-    font-size: .9rem;
-    margin-bottom: .75rem;
-    line-height: 1.6;
+  .del-sub { color:var(--text2); font-size:.88rem; line-height:1.6; margin-bottom:.85rem; }
+
+  .del-obj {
+    background:rgba(255,255,255,.04); border:1px solid var(--border);
+    border-radius:var(--r-md); padding:.8rem 1.1rem;
+    font-style:italic; color:var(--text2); font-family:var(--font-h); font-size:1rem;
+    margin-bottom:2rem;
   }
 
-  .delete-obj {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: .75rem 1rem;
-    font-style: italic;
-    color: var(--text);
-    margin-bottom: 2rem;
-    font-family: var(--font-head);
-    font-size: 1.05rem;
-  }
+  .del-actions { display:flex; gap:.75rem; justify-content:center; }
 
-  .delete-actions {
-    display: flex;
-    gap: .75rem;
-    justify-content: center;
+  .del-confirm {
+    background:linear-gradient(135deg,#c0404a,#8b2230);
+    color:#fff; border:none; border-radius:var(--r-md);
+    padding:.72rem 1.75rem; font-family:var(--font-b); font-size:.9rem; font-weight:500;
+    cursor:pointer; transition:all .25s cubic-bezier(.34,1.56,.64,1);
+    box-shadow:0 4px 16px rgba(192,64,74,.35);
   }
-
-  .btn-confirm-delete {
-    background: var(--danger);
-    color: #fff;
-    border: 1px solid var(--danger);
-    border-radius: 8px;
-    padding: .7rem 1.75rem;
-    font-family: var(--font-body);
-    font-size: .9rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all .2s;
-  }
-  .btn-confirm-delete:hover { background: #a8453c; border-color: #a8453c; }
+  .del-confirm:hover { transform:translateY(-1px); box-shadow:0 8px 24px rgba(192,64,74,.5); }
 </style>
 
-<div class="delete-page">
-  <div class="delete-card">
-    <span class="delete-icon">🗑️</span>
-    <h1 class="delete-title">Are you sure?</h1>
-    <p class="delete-sub">This action cannot be undone. The following will be permanently deleted:</p>
-
-    <div class="delete-obj">{{ obj }}</div>
-
-    <div class="delete-actions">
-      <a href="{% url 'home' %}" class="btn btn-ghost">Cancel</a>
+<div class="del-pg">
+  <div class="del-card">
+    <span class="del-icon">🗑️</span>
+    <h1 class="del-title">Are you sure?</h1>
+    <p class="del-sub">This action is permanent and cannot be undone. You're about to delete:</p>
+    <div class="del-obj">{{ obj }}</div>
+    <div class="del-actions">
+      <a href="{% url 'home' %}" class="btn btn-ghost">Keep it</a>
       <form method="POST" style="display:inline;">
         {% csrf_token %}
-        <button type="submit" class="btn-confirm-delete">Yes, Delete</button>
+        <button type="submit" class="del-confirm">Yes, Delete</button>
       </form>
     </div>
   </div>
 </div>
-
 {% endblock %}

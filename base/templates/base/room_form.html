@@ -1,201 +1,153 @@
 {% extends 'base/main.html' %}
 {% block content %}
-
 <style>
-  .form-page {
-    min-height: calc(100vh - 62px);
-    display: flex;
-    align-items: flex-start;
-    justify-content: center;
-    padding: 3rem 1rem;
+  .form-pg {
+    min-height:calc(100vh - 64px);
+    display:flex; align-items:flex-start; justify-content:center;
+    padding:3rem 1rem;
   }
+
+  .form-wrap {
+    width:100%; max-width:560px;
+    animation:fIn .45s cubic-bezier(.34,1.56,.64,1);
+  }
+  @keyframes fIn { from{opacity:0;transform:translateY(20px) scale(.97)} to{opacity:1;transform:none} }
 
   .form-card {
-    width: 100%;
-    max-width: 560px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    overflow: hidden;
-    animation: cardIn .4s ease;
-  }
-  @keyframes cardIn {
-    from { opacity: 0; transform: translateY(16px); }
-    to   { opacity: 1; transform: translateY(0); }
+    background:var(--glass);
+    border:1px solid var(--border2);
+    border-radius:var(--r-xl);
+    backdrop-filter:blur(24px);
+    overflow:hidden;
+    box-shadow:0 24px 80px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.06);
   }
 
-  .form-card__header {
-    padding: 1.75rem 2rem 1.25rem;
-    border-bottom: 1px solid var(--border);
+  .form-card-hdr {
+    padding:1.75rem 2rem 1.35rem;
+    border-bottom:1px solid var(--border);
+    background:linear-gradient(135deg,rgba(155,138,255,.04) 0%,transparent 80%);
+    position:relative;
+  }
+  .form-card-hdr::after {
+    content:''; position:absolute; bottom:0; left:0; right:0; height:1px;
+    background:linear-gradient(90deg,transparent,rgba(155,138,255,.3),transparent);
   }
 
-  .form-card__back {
-    display: inline-flex;
-    align-items: center;
-    gap: .35rem;
-    color: var(--muted);
-    font-size: .8rem;
-    margin-bottom: 1rem;
-    transition: color .2s;
+  .form-back {
+    display:inline-flex; align-items:center; gap:.3rem;
+    color:var(--text3); font-size:.8rem; margin-bottom:.9rem;
+    transition:color .2s;
   }
-  .form-card__back:hover { color: var(--accent); }
+  .form-back:hover { color:var(--violet2); }
 
-  .form-card__title {
-    font-family: var(--font-head);
-    font-size: 1.6rem;
-    font-weight: 400;
+  .form-title {
+    font-family:var(--font-h); font-size:1.6rem; font-weight:500; margin-bottom:.2rem;
   }
-  .form-card__sub {
-    color: var(--muted);
-    font-size: .875rem;
-    margin-top: .25rem;
-  }
+  .form-sub { color:var(--text3); font-size:.86rem; }
 
-  .form-card__body { padding: 1.75rem 2rem; }
+  .form-body { padding:1.75rem 2rem; }
 
-  .field { margin-bottom: 1.25rem; }
+  .field { margin-bottom:1.2rem; }
   .field label {
-    display: block;
-    font-size: .78rem;
-    font-weight: 500;
-    color: var(--muted);
-    letter-spacing: .06em;
-    text-transform: uppercase;
-    margin-bottom: .45rem;
+    display:block; font-size:.72rem; font-weight:600; color:var(--text3);
+    letter-spacing:.09em; text-transform:uppercase; margin-bottom:.42rem;
   }
-
-  .field input[type="text"],
-  .field select,
-  .field textarea {
-    width: 100%;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    color: var(--text);
-    font-family: var(--font-body);
-    font-size: .9rem;
-    padding: .75rem 1rem;
-    outline: none;
-    transition: border-color .2s;
+  .field input, .field select, .field textarea {
+    width:100%; background:var(--glass2); border:1px solid var(--border);
+    border-radius:var(--r-md); color:var(--text); font-family:var(--font-b);
+    font-size:.9rem; padding:.72rem 1rem; outline:none;
+    transition:border-color .25s, box-shadow .25s;
   }
-  .field input:focus,
-  .field select:focus,
-  .field textarea:focus { border-color: var(--accent); }
-  .field input::placeholder,
-  .field textarea::placeholder { color: var(--muted); }
-
-  .field select option { background: var(--surface2); color: var(--text); }
-
-  .field textarea { resize: vertical; min-height: 100px; line-height: 1.6; }
-
-  /* Django auto-rendered form fields */
-  .django-form p { margin-bottom: 1.25rem; }
-  .django-form p label {
-    display: block;
-    font-size: .78rem;
-    font-weight: 500;
-    color: var(--muted);
-    letter-spacing: .06em;
-    text-transform: uppercase;
-    margin-bottom: .45rem;
+  .field input:focus, .field select:focus, .field textarea:focus {
+    border-color:rgba(155,138,255,.45);
+    box-shadow:0 0 0 3px var(--violet-soft);
   }
-  .django-form p input,
-  .django-form p select,
-  .django-form p textarea {
-    width: 100%;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    color: var(--text);
-    font-family: var(--font-body);
-    font-size: .9rem;
-    padding: .75rem 1rem;
-    outline: none;
-    transition: border-color .2s;
+  .field input::placeholder, .field textarea::placeholder { color:var(--text3); }
+  .field select option { background:var(--bg2); color:var(--text); }
+  .field textarea { resize:vertical; min-height:100px; line-height:1.6; }
+
+  /* Django form */
+  .dj-form p { margin-bottom:1.2rem; }
+  .dj-form p label {
+    display:block; font-size:.72rem; font-weight:600; color:var(--text3);
+    letter-spacing:.09em; text-transform:uppercase; margin-bottom:.42rem;
   }
-  .django-form p input:focus,
-  .django-form p select:focus,
-  .django-form p textarea:focus { border-color: var(--accent); }
-  .django-form p textarea { resize: vertical; min-height: 100px; }
-  .django-form ul.errorlist { list-style: none; margin-top: .3rem; }
-  .django-form ul.errorlist li { font-size: .8rem; color: var(--danger); }
+  .dj-form p input, .dj-form p select, .dj-form p textarea {
+    width:100%; background:var(--glass2); border:1px solid var(--border);
+    border-radius:var(--r-md); color:var(--text); font-family:var(--font-b);
+    font-size:.9rem; padding:.72rem 1rem; outline:none;
+    transition:border-color .25s, box-shadow .25s;
+  }
+  .dj-form p input:focus, .dj-form p select:focus, .dj-form p textarea:focus {
+    border-color:rgba(155,138,255,.45); box-shadow:0 0 0 3px var(--violet-soft);
+  }
+  .dj-form p textarea { resize:vertical; min-height:100px; }
+  .dj-form ul.errorlist { list-style:none; margin-top:.3rem; }
+  .dj-form ul.errorlist li { font-size:.78rem; color:var(--danger); }
 
   .form-actions {
-    display: flex;
-    gap: .75rem;
-    justify-content: flex-end;
-    padding-top: 1rem;
-    border-top: 1px solid var(--border);
-    margin-top: .5rem;
+    display:flex; gap:.7rem; justify-content:flex-end;
+    padding-top:1.1rem; border-top:1px solid var(--border); margin-top:.5rem;
   }
 
   .form-submit {
-    background: var(--accent);
-    color: #0f0e0c;
-    border: none;
-    border-radius: 8px;
-    padding: .75rem 2rem;
-    font-family: var(--font-head);
-    font-size: 1rem;
-    cursor: pointer;
-    transition: background .2s;
+    background:linear-gradient(135deg,var(--violet),var(--indigo));
+    color:#fff; border:none; border-radius:var(--r-md);
+    padding:.75rem 2rem; font-family:var(--font-h); font-size:.95rem; font-weight:500;
+    cursor:pointer; box-shadow:0 6px 20px var(--violet-glow);
+    transition:all .25s cubic-bezier(.34,1.56,.64,1);
   }
-  .form-submit:hover { background: var(--accent2); }
+  .form-submit:hover { transform:translateY(-1px); box-shadow:0 10px 28px var(--violet-glow); }
 </style>
 
-<div class="form-page">
-  <div class="form-card">
-    <div class="form-card__header">
-      <a href="{% url 'home' %}" class="form-card__back">← Back to rooms</a>
-      <h1 class="form-card__title">
-        {% if form.instance.pk %}Edit Room{% else %}Create a Room{% endif %}
-      </h1>
-      <p class="form-card__sub">
-        {% if form.instance.pk %}Update your study room details{% else %}Start a new study session{% endif %}
-      </p>
-    </div>
+<div class="form-pg">
+  <div class="form-wrap">
+    <div class="form-card">
+      <div class="form-card-hdr">
+        <a href="{% url 'home' %}" class="form-back">← Back to rooms</a>
+        <h1 class="form-title">
+          {% if form.instance.pk %}Edit Room{% else %}Create a Room{% endif %}
+        </h1>
+        <p class="form-sub">
+          {% if form.instance.pk %}Update your study room{% else %}Start a new study session for everyone{% endif %}
+        </p>
+      </div>
 
-    <div class="form-card__body">
-      <form method="POST" class="django-form">
-        {% csrf_token %}
-        <div class="field">
-          <label for="room_topic">Topic</label>
+      <div class="form-body">
+        <form method="POST">
+          {% csrf_token %}
 
-          <input
-            required
-            type="text"
-            value="{{ room.topic.name }}"
-            name="topic"
-            list="topic-list"
-            placeholder="Enter or select a topic"
-          >
+          <div class="field">
+            <label>Topic</label>
+            <input type="text" name="topic" list="topic-opts"
+              value="{% if form.instance.pk %}{{ form.instance.topic.name }}{% endif %}"
+              placeholder="e.g. Python, Design, Math…" required/>
+            <datalist id="topic-opts">
+              {% for topic in form.fields.topic.queryset|default_if_none:'' %}
+                <option value="{{ topic.name }}">
+              {% endfor %}
+            </datalist>
+          </div>
 
-          <datalist id="topic-list">
-            {% for topic in topics %}
-            <option value="{{ topic.name }}">
-            {% endfor %}
-          </datalist>
-        </div>
+          <div class="field">
+            <label>Room Name</label>
+            {{ form.name }}
+          </div>
 
-        <div class="field">
-          <label for="room_name">Room Name</label>
-          {{ form.name }}
-        </div>
+          <div class="field">
+            <label>Description <span style="color:var(--text3);font-size:.78rem;text-transform:none;letter-spacing:0;">(optional)</span></label>
+            {{ form.description }}
+          </div>
 
-        <div class="field">
-          <label for="room_description">Description</label>
-          {{ form.description }}
-        </div>
-        
-        <div class="form-actions">
-          <a href="{% url 'home' %}" class="btn btn-ghost">Cancel</a>
-          <button type="submit" class="form-submit">
-            {% if form.instance.pk %}Save Changes{% else %}Create Room{% endif %}
-          </button>
-        </div>
-      </form>
+          <div class="form-actions">
+            <a href="{% url 'home' %}" class="btn btn-ghost">Cancel</a>
+            <button type="submit" class="form-submit">
+              {% if form.instance.pk %}Save Changes{% else %}Create Room ✦{% endif %}
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   </div>
 </div>
-
 {% endblock %}

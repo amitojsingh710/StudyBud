@@ -1,319 +1,258 @@
 {% extends 'base/main.html' %}
 {% block content %}
-
 <style>
-  .room-layout {
-    display: grid;
-    grid-template-columns: 1fr 280px;
-    gap: 1.5rem;
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: 2rem;
-    align-items: start;
+  .room-pg {
+    display:grid;
+    grid-template-columns:1fr 270px;
+    gap:1.25rem;
+    max-width:1150px;
+    margin:0 auto;
+    padding:1.75rem 1.5rem;
+    align-items:start;
   }
 
-  /* ── Room Header ── */
-  .room-header {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 1.5rem;
-    margin-bottom: 1.25rem;
+  /* ─── Room header ─── */
+  .r-hdr {
+    background:var(--glass);
+    border:1px solid var(--border);
+    border-radius:var(--r-lg);
+    backdrop-filter:blur(16px);
+    padding:1.4rem 1.6rem;
+    margin-bottom:1.1rem;
+    position:relative; overflow:hidden;
   }
-  .room-header__top {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 1rem;
-    margin-bottom: 1rem;
-  }
-  .room-header__topic { margin-bottom: .6rem; }
-  .room-header__name {
-    font-family: var(--font-head);
-    font-size: 1.8rem;
-    font-weight: 400;
-    line-height: 1.2;
-  }
-  .room-header__desc {
-    color: var(--muted);
-    font-size: .9rem;
-    margin-top: .4rem;
-    line-height: 1.6;
-  }
-  .room-header__actions { display: flex; gap: .5rem; flex-shrink: 0; }
-  .room-header__meta {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    padding-top: 1rem;
-    border-top: 1px solid var(--border);
-  }
-  .room-header__host {
-    display: flex;
-    align-items: center;
-    gap: .5rem;
-    font-size: .85rem;
-    color: var(--muted);
-  }
-  .room-header__host a { color: var(--accent); }
-  .room-header__host a:hover { color: var(--accent2); }
-
-  /* ── Messages ── */
-  .messages-section { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
-
-  .messages-list {
-    padding: 1.25rem;
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    max-height: 480px;
-    overflow-y: auto;
+  .r-hdr::before {
+    content:''; position:absolute; top:0; left:0; right:0; height:2px;
+    background:linear-gradient(90deg,var(--violet),var(--cyan),var(--peach));
+    opacity:.6;
   }
 
-  .message-item {
-    display: flex;
-    gap: .75rem;
-    animation: fadeUp .3s ease;
+  .r-hdr-top {
+    display:flex; align-items:flex-start; justify-content:space-between;
+    gap:1rem; margin-bottom:1rem;
   }
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(8px); }
-    to   { opacity: 1; transform: translateY(0); }
+  .r-topic-row { margin-bottom:.55rem; }
+  .r-name {
+    font-family:var(--font-h); font-size:1.75rem; font-weight:500; line-height:1.2;
+  }
+  .r-desc { color:var(--text2); font-size:.88rem; margin-top:.35rem; line-height:1.6; }
+  .r-actions { display:flex; gap:.5rem; flex-shrink:0; }
+
+  .r-meta {
+    display:flex; align-items:center; gap:1rem;
+    padding-top:1rem; border-top:1px solid var(--border);
+  }
+  .r-host { display:flex; align-items:center; gap:.5rem; font-size:.83rem; color:var(--text2); }
+  .r-host .av { width:28px; height:28px; font-size:.72rem; }
+  .r-host a { color:var(--violet2); }
+  .r-host a:hover { color:#fff; }
+  .r-updated { font-size:.75rem; color:var(--text3); margin-left:auto; }
+
+  /* ─── Chat box ─── */
+  .chat-box {
+    background:var(--glass);
+    border:1px solid var(--border);
+    border-radius:var(--r-lg);
+    backdrop-filter:blur(16px);
+    overflow:hidden;
   }
 
-  .message-item .avatar { flex-shrink: 0; width: 36px; height: 36px; font-size: .85rem; }
-  .message-item__content { flex: 1; }
-  .message-item__header {
-    display: flex;
-    align-items: center;
-    gap: .6rem;
-    margin-bottom: .3rem;
+  .msgs {
+    padding:1.2rem;
+    display:flex; flex-direction:column; gap:.9rem;
+    max-height:460px; overflow-y:auto;
   }
-  .message-item__author {
-    font-weight: 500;
-    font-size: .85rem;
-    color: var(--accent);
-  }
-  .message-item__author:hover { color: var(--accent2); }
-  .message-item__time { font-size: .75rem; color: var(--muted); }
-  .message-item__body {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 0 10px 10px 10px;
-    padding: .65rem .9rem;
-    font-size: .9rem;
-    line-height: 1.55;
-    color: var(--text);
-  }
-  .message-item__del {
-    margin-left: auto;
-    font-size: .75rem;
-    color: var(--muted);
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 0;
-    text-decoration: none;
-  }
-  .message-item__del:hover { color: var(--danger); }
 
-  /* ── Message Form ── */
-  .message-form {
-    border-top: 1px solid var(--border);
-    padding: 1rem 1.25rem;
-    display: flex;
-    gap: .75rem;
-    align-items: flex-end;
+  .msg {
+    display:flex; gap:.7rem;
+    animation:msgIn .3s cubic-bezier(.34,1.56,.64,1);
   }
-  .message-form textarea {
-    flex: 1;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    color: var(--text);
-    font-family: var(--font-body);
-    font-size: .9rem;
-    padding: .75rem 1rem;
-    resize: none;
-    outline: none;
-    min-height: 60px;
-    max-height: 150px;
-    transition: border-color .2s;
-  }
-  .message-form textarea:focus { border-color: var(--accent); }
-  .message-form textarea::placeholder { color: var(--muted); }
-  .message-form button {
-    background: var(--accent);
-    color: #0f0e0c;
-    border: none;
-    border-radius: 10px;
-    padding: .75rem 1.2rem;
-    font-family: var(--font-body);
-    font-weight: 600;
-    font-size: .9rem;
-    cursor: pointer;
-    transition: background .2s;
-    white-space: nowrap;
-  }
-  .message-form button:hover { background: var(--accent2); }
+  @keyframes msgIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:none} }
 
-  /* ── Participants ── */
-  .participants-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 1.25rem;
-    position: sticky;
-    top: 80px;
+  .msg .av { flex-shrink:0; width:34px; height:34px; font-size:.8rem; }
+  .msg-body { flex:1; }
+  .msg-hdr {
+    display:flex; align-items:center; gap:.55rem; margin-bottom:.28rem;
   }
-  .participants-title {
-    font-family: var(--font-head);
-    font-size: 1rem;
-    color: var(--muted);
-    letter-spacing: .06em;
-    text-transform: uppercase;
-    margin-bottom: 1rem;
+  .msg-author { font-weight:500; font-size:.83rem; color:var(--violet2); }
+  .msg-author:hover { color:#fff; }
+  .msg-time { font-size:.72rem; color:var(--text3); }
+  .msg-del {
+    margin-left:auto; font-size:.75rem; color:var(--text3);
+    background:none; border:none; cursor:pointer; padding:0; text-decoration:none;
+    transition:color .2s;
   }
-  .participants-count {
-    font-size: .8rem;
-    color: var(--muted);
-    margin-bottom: 1rem;
+  .msg-del:hover { color:var(--danger); }
+
+  .msg-bubble {
+    background:var(--glass2);
+    border:1px solid var(--border);
+    border-radius:2px var(--r-md) var(--r-md) var(--r-md);
+    padding:.6rem .9rem; font-size:.89rem; line-height:1.55; color:var(--text);
   }
-  .participants-list { display: flex; flex-direction: column; gap: .6rem; }
-  .participant-item {
-    display: flex;
-    align-items: center;
-    gap: .6rem;
-    font-size: .85rem;
-    padding: .4rem .5rem;
-    border-radius: 8px;
-    transition: background .2s;
+
+  /* ─── Message input ─── */
+  .msg-form {
+    border-top:1px solid var(--border);
+    padding:1rem 1.2rem;
+    display:flex; gap:.7rem; align-items:flex-end;
   }
-  .participant-item:hover { background: var(--surface2); }
-  .participant-item .avatar { width: 30px; height: 30px; font-size: .75rem; }
-  .participant-item a { color: var(--text); }
-  .participant-item a:hover { color: var(--accent); }
+  .msg-form textarea {
+    flex:1; background:var(--glass2); border:1px solid var(--border);
+    border-radius:var(--r-md); color:var(--text); font-family:var(--font-b);
+    font-size:.88rem; padding:.7rem 1rem; resize:none; outline:none;
+    min-height:52px; max-height:140px; line-height:1.55;
+    transition:border-color .25s, box-shadow .25s;
+  }
+  .msg-form textarea:focus {
+    border-color:rgba(155,138,255,.4);
+    box-shadow:0 0 0 3px var(--violet-soft);
+  }
+  .msg-form textarea::placeholder { color:var(--text3); }
+
+  .send-btn {
+    background:linear-gradient(135deg,var(--violet),var(--indigo));
+    color:#fff; border:none; border-radius:var(--r-md);
+    padding:.7rem 1.2rem; font-family:var(--font-b); font-weight:600;
+    font-size:.88rem; cursor:pointer; white-space:nowrap;
+    box-shadow:0 4px 16px var(--violet-glow);
+    transition:all .25s cubic-bezier(.34,1.56,.64,1);
+  }
+  .send-btn:hover { transform:translateY(-1px); box-shadow:0 8px 24px var(--violet-glow); }
 
   .login-prompt {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 1.25rem;
-    text-align: center;
-    font-size: .9rem;
-    color: var(--muted);
-    margin-top: 1rem;
+    background:var(--glass2); border-top:1px solid var(--border);
+    padding:1.1rem; text-align:center; font-size:.88rem; color:var(--text2);
   }
-  .login-prompt a { color: var(--accent); }
+  .login-prompt a { color:var(--violet2); }
+  .login-prompt a:hover { color:#fff; }
 
-  @media (max-width: 768px) {
-    .room-layout { grid-template-columns: 1fr; }
-    .participants-card { position: static; }
+  /* ─── Participants panel ─── */
+  .part-panel {
+    background:var(--glass); border:1px solid var(--border);
+    border-radius:var(--r-lg); backdrop-filter:blur(16px);
+    padding:1.2rem; position:sticky; top:calc(64px + 1.25rem);
+  }
+  .part-count { font-size:.8rem; color:var(--text3); margin-bottom:1rem; }
+  .part-list { display:flex; flex-direction:column; gap:.5rem; }
+  .part-item {
+    display:flex; align-items:center; gap:.55rem; font-size:.84rem;
+    padding:.38rem .5rem; border-radius:var(--r-sm);
+    transition:background .2s;
+  }
+  .part-item:hover { background:var(--glass2); }
+  .part-item .av { width:28px; height:28px; font-size:.72rem; }
+  .part-item a { color:var(--text); }
+  .part-item a:hover { color:var(--violet2); }
+
+  @media(max-width:780px) {
+    .room-pg { grid-template-columns:1fr; }
+    .part-panel { position:static; }
   }
 </style>
 
-<div class="room-layout">
-
-  <!-- Main: Chat -->
+<div class="room-pg">
+  <!-- Chat -->
   <div>
-    <!-- Room Header -->
-    <div class="room-header">
-      <div class="room-header__top">
+    <div class="r-hdr">
+      <div class="r-hdr-top">
         <div>
-          <div class="room-header__topic">
+          <div class="r-topic-row">
             <a href="{% url 'home' %}?q={{ room.topic.name }}" class="tag">{{ room.topic }}</a>
           </div>
-          <h1 class="room-header__name">{{ room.name }}</h1>
+          <h1 class="r-name">{{ room.name }}</h1>
           {% if room.description %}
-          <p class="room-header__desc">{{ room.description }}</p>
+          <p class="r-desc">{{ room.description }}</p>
           {% endif %}
         </div>
         {% if request.user == room.host %}
-        <div class="room-header__actions">
+        <div class="r-actions">
           <a href="{% url 'update-room' room.id %}" class="btn btn-ghost" style="font-size:.8rem;padding:.4rem .9rem;">✏️ Edit</a>
-          <a href="{% url 'delete-room' room.id %}" class="btn btn-danger" style="font-size:.8rem;padding:.4rem .9rem;">🗑️ Delete</a>
+          <a href="{% url 'delete-room' room.id %}" class="btn btn-danger" style="font-size:.8rem;padding:.4rem .9rem;">🗑️</a>
         </div>
         {% endif %}
       </div>
-      <div class="room-header__meta">
-        <div class="room-header__host">
-          <div class="avatar">{{ room.host.username|first|upper }}</div>
+      <div class="r-meta">
+        <div class="r-host">
+          <div class="av">{{ room.host.username|first|upper }}</div>
           Hosted by <a href="{% url 'user-profile' room.host.id %}">@{{ room.host.username }}</a>
         </div>
-        <span style="color:var(--muted);font-size:.8rem;">Updated {{ room.updated|timesince }} ago</span>
+        <span class="r-updated">{{ room.updated|timesince }} ago</span>
       </div>
     </div>
 
-    <!-- Messages -->
-    <div class="messages-section">
-      <div class="messages-list" id="messages-list">
+    <div class="chat-box">
+      <div class="msgs" id="msgs">
         {% for message in room_messages %}
-        <div class="message-item">
-          <div class="avatar">{{ message.user.username|first|upper }}</div>
-          <div class="message-item__content">
-            <div class="message-item__header">
-              <a href="{% url 'user-profile' message.user.id %}" class="message-item__author">@{{ message.user.username }}</a>
-              <span class="message-item__time">{{ message.created|timesince }} ago</span>
+        <div class="msg">
+          <div class="av">{{ message.user.username|first|upper }}</div>
+          <div class="msg-body">
+            <div class="msg-hdr">
+              <a href="{% url 'user-profile' message.user.id %}" class="msg-author">@{{ message.user.username }}</a>
+              <span class="msg-time">{{ message.created|timesince }} ago</span>
               {% if request.user == message.user %}
-              <a href="{% url 'delete-message' message.id %}" class="message-item__del">✕</a>
+              <a href="{% url 'delete-message' message.id %}" class="msg-del">✕</a>
               {% endif %}
             </div>
-            <div class="message-item__body">{{ message.body }}</div>
+            <div class="msg-bubble">{{ message.body }}</div>
           </div>
         </div>
         {% empty %}
-        <p style="text-align:center;color:var(--muted);font-style:italic;padding:2rem;font-family:var(--font-head);">
-          Be the first to say something!
+        <p style="text-align:center;color:var(--text3);font-style:italic;padding:2.5rem;font-family:var(--font-h);font-size:1rem;">
+          The room is quiet… be the first to speak ✨
         </p>
         {% endfor %}
       </div>
 
       {% if request.user.is_authenticated %}
-      <form class="message-form" method="POST">
+      <form class="msg-form" method="POST">
         {% csrf_token %}
-        <textarea name="body" placeholder="Write a message…" rows="2"></textarea>
-        <button type="submit">Send</button>
+        <textarea id="msg-ta" name="body" placeholder="Say something…" rows="2"></textarea>
+        <button type="submit" class="send-btn">Send ↑</button>
       </form>
       {% else %}
       <div class="login-prompt">
-        <a href="{% url 'login' %}">Log in</a> to join the conversation
+        <a href="{% url 'login' %}">Sign in</a> to join the conversation
       </div>
       {% endif %}
     </div>
   </div>
 
-  <!-- Sidebar: Participants -->
+  <!-- Participants -->
   <aside>
-    <div class="participants-card">
-      <p class="participants-title">Participants</p>
-      <p class="participants-count">{{ participants.count }} member{{ participants.count|pluralize }}</p>
-      <div class="participants-list">
-        {% for participant in participants %}
-        <div class="participant-item">
-          <div class="avatar">{{ participant.username|first|upper }}</div>
-          <a href="{% url 'user-profile' participant.id %}">@{{ participant.username }}</a>
+    <div class="part-panel">
+      <p class="s-title">Participants</p>
+      <p class="part-count">{{ participants.count }} member{{ participants.count|pluralize }}</p>
+      <div class="part-list">
+        {% for p in participants %}
+        <div class="part-item">
+          <div class="av">{{ p.username|first|upper }}</div>
+          <a href="{% url 'user-profile' p.id %}">@{{ p.username }}</a>
         </div>
         {% empty %}
-        <p style="color:var(--muted);font-size:.85rem;">No participants yet.</p>
+        <p style="color:var(--text3);font-size:.84rem;font-style:italic;">No one here yet.</p>
         {% endfor %}
       </div>
     </div>
   </aside>
-
 </div>
 
 <script>
-  // Auto-scroll messages to bottom
-  const list = document.getElementById('messages-list');
-  if (list) list.scrollTop = list.scrollHeight;
+  const el = document.getElementById('msgs');
+  if (el) el.scrollTop = el.scrollHeight;
 
-  // Auto-grow textarea
-  const ta = document.querySelector('.message-form textarea');
+  const ta = document.getElementById('msg-ta');
   if (ta) {
     ta.addEventListener('input', () => {
       ta.style.height = 'auto';
       ta.style.height = ta.scrollHeight + 'px';
     });
+    ta.addEventListener('keydown', e => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        ta.closest('form').submit();
+      }
+    });
   }
 </script>
-
 {% endblock %}

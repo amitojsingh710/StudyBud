@@ -1,184 +1,125 @@
 {% extends 'base/main.html' %}
 {% block content %}
-
 <style>
-  .profile-layout {
-    display: grid;
-    grid-template-columns: 300px 1fr;
-    gap: 1.5rem;
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: 2rem;
-    align-items: start;
+  .prof-pg {
+    display:grid; grid-template-columns:280px 1fr;
+    gap:1.25rem; max-width:1100px; margin:0 auto; padding:1.75rem 1.5rem; align-items:start;
   }
 
-  /* ── Profile Card ── */
-  .profile-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 2rem;
-    text-align: center;
-    position: sticky;
-    top: 80px;
+  /* ─── Profile card ─── */
+  .prof-card {
+    background:var(--glass); border:1px solid var(--border);
+    border-radius:var(--r-xl); backdrop-filter:blur(16px);
+    padding:2rem 1.6rem; text-align:center;
+    position:sticky; top:calc(64px + 1.25rem);
+    overflow:hidden;
+  }
+  .prof-card::before {
+    content:''; position:absolute; top:0; left:0; right:0; height:80px;
+    background:linear-gradient(135deg,rgba(155,138,255,.12),rgba(92,232,222,.07));
+    border-radius:var(--r-xl) var(--r-xl) 60% 60%;
   }
 
-  .profile-avatar {
-    width: 80px; height: 80px;
-    border-radius: 50%;
-    background: var(--surface2);
-    border: 3px solid var(--accent);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: var(--font-head);
-    font-size: 2rem;
-    color: var(--accent);
-    margin: 0 auto 1rem;
+  .prof-av {
+    position:relative; z-index:1;
+    width:80px; height:80px; border-radius:50%;
+    background:linear-gradient(135deg,rgba(155,138,255,.3),rgba(92,232,222,.18));
+    border:2px solid rgba(155,138,255,.35);
+    display:flex; align-items:center; justify-content:center;
+    font-family:var(--font-h); font-size:2rem; color:var(--violet2);
+    margin:0 auto 1rem;
+    box-shadow:0 0 24px var(--violet-glow);
   }
 
-  .profile-name {
-    font-family: var(--font-head);
-    font-size: 1.5rem;
-    font-weight: 400;
-    margin-bottom: .25rem;
+  .prof-name {
+    position:relative; z-index:1;
+    font-family:var(--font-h); font-size:1.45rem; font-weight:500; margin-bottom:.2rem;
   }
+  .prof-uname { color:var(--text3); font-size:.88rem; margin-bottom:1.25rem; }
 
-  .profile-username {
-    color: var(--muted);
-    font-size: .9rem;
-    margin-bottom: 1.25rem;
+  .prof-stats {
+    display:flex; justify-content:center; gap:2rem;
+    padding:1rem 0; border-top:1px solid var(--border); border-bottom:1px solid var(--border);
+    margin-bottom:1.25rem;
   }
+  .stat-n {
+    font-family:var(--font-h); font-size:1.5rem;
+    background:linear-gradient(135deg,var(--violet),var(--cyan));
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+    line-height:1;
+  }
+  .stat-l { font-size:.7rem; color:var(--text3); text-transform:uppercase; letter-spacing:.09em; margin-top:.2rem; }
 
-  .profile-stats {
-    display: flex;
-    justify-content: center;
-    gap: 2rem;
-    padding: 1rem 0;
-    border-top: 1px solid var(--border);
-    border-bottom: 1px solid var(--border);
-    margin-bottom: 1.25rem;
-  }
+  .prof-topics { display:flex; flex-wrap:wrap; gap:.35rem; justify-content:center; }
 
-  .stat { text-align: center; }
-  .stat-num {
-    font-family: var(--font-head);
-    font-size: 1.5rem;
-    color: var(--accent);
-    line-height: 1;
-  }
-  .stat-label {
-    font-size: .75rem;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: .06em;
-    margin-top: .2rem;
-  }
-
-  /* ── Topics ── */
-  .profile-topics {
-    display: flex;
-    flex-wrap: wrap;
-    gap: .4rem;
-    justify-content: center;
-  }
-
-  /* ── Tabs ── */
+  /* ─── Tabs ─── */
   .tabs {
-    display: flex;
-    gap: 0;
-    border-bottom: 1px solid var(--border);
-    margin-bottom: 1.5rem;
+    display:flex; border-bottom:1px solid var(--border); margin-bottom:1.25rem; gap:.25rem;
   }
   .tab {
-    padding: .65rem 1.25rem;
-    font-size: .875rem;
-    font-weight: 500;
-    color: var(--muted);
-    cursor: pointer;
-    border-bottom: 2px solid transparent;
-    margin-bottom: -1px;
-    transition: all .2s;
+    padding:.6rem 1.2rem; font-size:.855rem; font-weight:500; color:var(--text3);
+    cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-1px;
+    border-radius:var(--r-sm) var(--r-sm) 0 0; transition:all .2s;
   }
-  .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .tab:hover { color:var(--text2); background:var(--glass); }
+  .tab.on { color:var(--violet2); border-bottom-color:var(--violet); }
 
-  /* ── Rooms Grid ── */
-  .profile-rooms { display: flex; flex-direction: column; gap: .85rem; }
+  /* ─── Room items ─── */
+  .p-rooms { display:flex; flex-direction:column; gap:.75rem; }
 
-  .profile-room-item {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 1rem 1.25rem;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    transition: border-color .2s;
+  .p-room {
+    background:var(--glass); border:1px solid var(--border);
+    border-radius:var(--r-md); padding:.95rem 1.2rem;
+    display:flex; align-items:center; justify-content:space-between; gap:1rem;
+    transition:border-color .2s, transform .2s;
   }
-  .profile-room-item:hover { border-color: var(--accent); }
-  .profile-room-item__info { flex: 1; }
-  .profile-room-item__name {
-    font-weight: 500;
-    margin-bottom: .25rem;
-  }
-  .profile-room-item__name a:hover { color: var(--accent); }
-  .profile-room-item__meta { font-size: .8rem; color: var(--muted); display: flex; gap: .75rem; }
+  .p-room:hover { border-color:var(--border2); transform:translateX(3px); }
+  .p-room-info { flex:1; }
+  .p-room-name { font-weight:500; margin-bottom:.3rem; }
+  .p-room-name a:hover { color:var(--violet2); }
+  .p-room-meta { font-size:.78rem; color:var(--text3); display:flex; gap:.7rem; align-items:center; }
 
-  /* ── Messages ── */
-  .profile-messages { display: flex; flex-direction: column; gap: .85rem; }
+  /* ─── Message items ─── */
+  .p-msgs { display:flex; flex-direction:column; gap:.75rem; }
 
-  .profile-msg-item {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 1rem 1.25rem;
-    font-size: .875rem;
+  .p-msg {
+    background:var(--glass); border:1px solid var(--border);
+    border-radius:var(--r-md); padding:.95rem 1.2rem; font-size:.875rem;
+    transition:border-color .2s;
   }
-  .profile-msg-item__room {
-    font-size: .8rem;
-    color: var(--muted);
-    margin-bottom: .4rem;
-  }
-  .profile-msg-item__room a:hover { color: var(--accent); }
-  .profile-msg-item__body { color: var(--text); line-height: 1.5; }
+  .p-msg:hover { border-color:var(--border2); }
+  .p-msg-rm { font-size:.78rem; color:var(--text3); margin-bottom:.35rem; }
+  .p-msg-rm a:hover { color:var(--text2); }
+  .p-msg-body { color:var(--text2); line-height:1.55; }
 
-  .empty-state {
-    text-align: center;
-    padding: 3rem;
-    color: var(--muted);
-    font-style: italic;
-    font-family: var(--font-head);
-    font-size: 1.05rem;
-  }
+  .empty { text-align:center; padding:3rem; color:var(--text3); font-style:italic; font-family:var(--font-h); }
 
-  @media (max-width: 768px) {
-    .profile-layout { grid-template-columns: 1fr; }
-    .profile-card { position: static; }
+  @media(max-width:760px) {
+    .prof-pg { grid-template-columns:1fr; }
+    .prof-card { position:static; }
   }
 </style>
 
-<div class="profile-layout">
-
-  <!-- Profile Card -->
+<div class="prof-pg">
+  <!-- Profile card -->
   <aside>
-    <div class="profile-card">
-      <div class="profile-avatar">{{ user.username|first|upper }}</div>
-      <h1 class="profile-name">{{ user.username }}</h1>
-      <p class="profile-username">@{{ user.username }}</p>
+    <div class="prof-card">
+      <div class="prof-av">{{ user.username|first|upper }}</div>
+      <h1 class="prof-name">{{ user.username }}</h1>
+      <p class="prof-uname">@{{ user.username }}</p>
 
-      <div class="profile-stats">
-        <div class="stat">
-          <div class="stat-num">{{ rooms.count }}</div>
-          <div class="stat-label">Rooms</div>
+      <div class="prof-stats">
+        <div>
+          <div class="stat-n">{{ rooms.count }}</div>
+          <div class="stat-l">Rooms</div>
         </div>
-        <div class="stat">
-          <div class="stat-num">{{ room_messages.count }}</div>
-          <div class="stat-label">Messages</div>
+        <div>
+          <div class="stat-n">{{ room_messages.count }}</div>
+          <div class="stat-l">Messages</div>
         </div>
       </div>
 
-      <div class="profile-topics">
+      <div class="prof-topics">
         {% for topic in topics %}
           <span class="tag">{{ topic.name }}</span>
         {% endfor %}
@@ -189,50 +130,46 @@
   <!-- Content -->
   <main>
     <div class="tabs">
-      <div class="tab active" onclick="showTab('rooms', this)">Rooms ({{ rooms.count }})</div>
-      <div class="tab" onclick="showTab('messages', this)">Messages ({{ room_messages.count }})</div>
+      <div class="tab on" onclick="showTab('rooms',this)">Rooms ({{ rooms.count }})</div>
+      <div class="tab" onclick="showTab('msgs',this)">Messages ({{ room_messages.count }})</div>
     </div>
 
-    <!-- Rooms Tab -->
-    <div id="tab-rooms" class="tab-content">
-      <div class="profile-rooms">
+    <div id="tab-rooms">
+      <div class="p-rooms">
         {% for room in rooms %}
-        <div class="profile-room-item">
-          <div class="profile-room-item__info">
-            <div class="profile-room-item__name">
-              <a href="{% url 'room' room.id %}">{{ room.name }}</a>
-            </div>
-            <div class="profile-room-item__meta">
-              <a href="{% url 'home' %}?q={{ room.topic.name }}" class="tag" style="font-size:.72rem;padding:.15rem .55rem;">{{ room.topic }}</a>
+        <div class="p-room">
+          <div class="p-room-info">
+            <div class="p-room-name"><a href="{% url 'room' room.id %}">{{ room.name }}</a></div>
+            <div class="p-room-meta">
+              <a href="{% url 'home' %}?q={{ room.topic.name }}" class="tag" style="font-size:.68rem;padding:.12rem .5rem;">{{ room.topic }}</a>
               <span>{{ room.updated|timesince }} ago</span>
             </div>
           </div>
           {% if request.user == room.host %}
           <div style="display:flex;gap:.4rem;">
-            <a href="{% url 'update-room' room.id %}" class="icon-btn">✏️</a>
-            <a href="{% url 'delete-room' room.id %}" class="icon-btn del">🗑️</a>
+            <a href="{% url 'update-room' room.id %}" class="ib">✏️</a>
+            <a href="{% url 'delete-room' room.id %}" class="ib del">🗑️</a>
           </div>
           {% endif %}
         </div>
         {% empty %}
-        <div class="empty-state">No rooms created yet.</div>
+        <div class="empty">No rooms created yet.</div>
         {% endfor %}
       </div>
     </div>
 
-    <!-- Messages Tab -->
-    <div id="tab-messages" class="tab-content" style="display:none;">
-      <div class="profile-messages">
+    <div id="tab-msgs" style="display:none;">
+      <div class="p-msgs">
         {% for message in room_messages %}
-        <div class="profile-msg-item">
-          <div class="profile-msg-item__room">
+        <div class="p-msg">
+          <div class="p-msg-rm">
             in <a href="{% url 'room' message.room.id %}">{{ message.room.name }}</a>
             &middot; {{ message.created|timesince }} ago
           </div>
-          <p class="profile-msg-item__body">{{ message.body }}</p>
+          <p class="p-msg-body">{{ message.body }}</p>
         </div>
         {% empty %}
-        <div class="empty-state">No messages yet.</div>
+        <div class="empty">No messages yet.</div>
         {% endfor %}
       </div>
     </div>
@@ -241,11 +178,10 @@
 
 <script>
   function showTab(name, el) {
-    document.querySelectorAll('.tab-content').forEach(t => t.style.display = 'none');
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    document.getElementById('tab-' + name).style.display = 'block';
-    el.classList.add('active');
+    document.querySelectorAll('[id^="tab-"]').forEach(t => t.style.display='none');
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('on'));
+    document.getElementById('tab-'+name).style.display='block';
+    el.classList.add('on');
   }
 </script>
-
 {% endblock %}
